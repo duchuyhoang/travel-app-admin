@@ -1,7 +1,6 @@
 import React from "react";
 import { Layout, notification } from "antd";
-import { Button, Checkbox, Form, Input, Col, Row } from "antd";
-import styled from "styled-components/macro";
+import { Button, Form, Input, Col, Row } from "antd";
 import { EMAIL_REGEX } from "constants/index";
 import { login } from "services/authentication";
 import { useAuthContext } from "components/AuthContext";

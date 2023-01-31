@@ -1,5 +1,5 @@
 import {
-  LaptopOutlined,
+  TagFilled,
   PieChartFilled,
   UserOutlined,
   FileFilled,
@@ -8,6 +8,8 @@ import {
 import UserManagement from "pages/UserManagement";
 import PostManagement from "pages/PostManagement";
 import Statistical from "pages/Statistical";
+import CategoryManagement from "pages/CategoryManagement";
+
 import Logout from "pages/Logout";
 
 const listRoutes = [
@@ -24,6 +26,13 @@ const listRoutes = [
     path: "/posts",
     private: true,
     page: PostManagement,
+  },
+  {
+    icon: TagFilled,
+    label: "Category management",
+    path: "/category",
+    private: true,
+    page: CategoryManagement,
   },
   {
     icon: PieChartFilled,

@@ -6,6 +6,7 @@ import Login from "pages/Login/index";
 import PrivateRouter from "components/PrivateRoute";
 import { PERMISSION } from "enums";
 import UserManagement from "pages/UserManagement";
+
 function App() {
   return (
     <Switch>

@@ -42,8 +42,8 @@ const PostManagement = () => {
       ...(orderBy !== "" && { orderBy }),
     };
     const [rs, err] = await getPosts(payload);
-    setMetadata(rs.metadata);
-    setData(rs.data);
+    setMetadata((rs as any).metadata);
+    setData((rs as any).data);
   };
 
   useEffect(() => {

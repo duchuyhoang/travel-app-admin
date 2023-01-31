@@ -109,8 +109,8 @@ const UserManagement = () => {
       offset,
     });
     if (rs) {
-      setData(rs.data);
-      setMetadata(rs.metadata);
+      setData((rs as any).data);
+      setMetadata((rs as any).metadata);
     }
   };
   useEffect(() => {
@@ -162,7 +162,7 @@ const UserManagement = () => {
             metadata
               ? {
                   pageSize: ITEMS_PER_PAGE,
-                  total: metadata.totalPage,
+                  total: metadata.total,
                   onChange(page, pageSize) {
                     handleGetUser((page - 1) * ITEMS_PER_PAGE);
                   },
