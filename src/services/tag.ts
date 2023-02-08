@@ -24,3 +24,14 @@ export const createTag = async (payload: {
     return [null, e];
   }
 };
+
+export const deleteTag = async (payload: { tags: Array<string> }) => {
+  try {
+    const response = await axios.delete("/tag", {
+      data: payload,
+    });
+    return [response.data, null];
+  } catch (e) {
+    return [null, e];
+  }
+};

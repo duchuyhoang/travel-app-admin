@@ -26,6 +26,7 @@ interface ICardPost {
   view: number;
   like: number;
   handleChangePostStatus: (id_post: string, status: POST_STATUS) => void;
+  handleDelete: (id_post: string) => void;
 }
 const defaulAvatar =
   "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.jpg";
@@ -46,6 +47,7 @@ const CardPost = ({
   handleChangePostStatus,
   view,
   like,
+  handleDelete,
 }: ICardPost) => {
   const [image, setImage] = useState(() => thumbnail);
   const [userAvatar, setUserAvatar] = useState(() => userInfo?.avatar);
@@ -111,7 +113,13 @@ const CardPost = ({
               //   console.log(id_post,v);
             }}
           ></Select>
-          <Button danger type="primary">
+          <Button
+            danger
+            type="primary"
+            onClick={() => {
+              handleDelete(id_post);
+            }}
+          >
             Delete
           </Button>
         </Row>

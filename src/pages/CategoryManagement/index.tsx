@@ -1,8 +1,17 @@
-import { Button, Layout, Row, Space, Table, TableColumnsType } from "antd";
+import {
+  Button,
+  Layout,
+  Modal,
+  notification,
+  Row,
+  Space,
+  Table,
+  TableColumnsType,
+} from "antd";
 import PageHeader from "components/PageHeader";
 import React, { useEffect, useState } from "react";
 import { ITEMS_PER_PAGE } from "../../constants/index";
-import { getTags } from "../../services/tag";
+import { getTags, deleteTag } from "../../services/tag";
 import { PlusOutlined } from "@ant-design/icons";
 import CreateTagModal from "./CreateTagModal";
 export interface Tag {
@@ -12,8 +21,8 @@ export interface Tag {
 }
 
 const columns: (param: {
-  handleSelectDeleteUser: (id: string) => void;
-}) => TableColumnsType<Tag> = ({ handleSelectDeleteUser }) => [
+  handleSelectDeleteTag: (id: string) => void;
+}) => TableColumnsType<Tag> = ({ handleSelectDeleteTag }) => [
   {
     title: "Id",
     dataIndex: "id_tag",
@@ -41,7 +50,7 @@ const columns: (param: {
           type="primary"
           danger
           onClick={() => {
-            handleSelectDeleteUser(record.id_tag.toString());
+            handleSelectDeleteTag(record.id_tag.toString());
           }}
         >
           Delete
@@ -54,12 +63,12 @@ const columns: (param: {
 const CategoryManagement = () => {
   const [metadata, setMetadata] = useState<any>(null);
   const [data, setData] = useState<Tag[]>([]);
-  const [selectedDeleteTag, setSelectedDeleteTag] = useState<string | null>(
-    null
-  );
   const [isOpenCreateTagModal, setIsOpenCreateTagModal] = useState(false);
-  const handleSelectDeleteUser = (id: string) => {
-    setSelectedDeleteTag(id);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [api, contextHolder] = notification.useNotification();
+
+  const handleSelectDeleteTag = (id: string) => {
+    setSelectedCategory(id);
   };
   const handleGetTags = async (offset: number) => {
     const [rs, err] = await getTags({
@@ -67,17 +76,51 @@ const CategoryManagement = () => {
       offset,
     });
     if (rs) {
-      setData((rs as any).data);
       setMetadata((rs as any).metadata);
+      setData((rs as any).data);
     }
   };
+
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     handleGetTags(0);
   }, []);
 
+  const handleDeletePost = async () => {
+    if (selectedCategory) {
+      setIsLoading(true);
+      const [rs, err] = await deleteTag({
+        tags: [selectedCategory],
+      });
+      if (err) {
+        api.error({
+          message: "Delete failed",
+        });
+      } else {
+        api.success({
+          message: "Delete succeed",
+        });
+        setSelectedCategory("");
+        handleGetTags((metadata.page - 1) * ITEMS_PER_PAGE);
+      }
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
+      <Modal
+        title="Are you sure ?"
+        open={!!selectedCategory}
+        onOk={handleDeletePost}
+        confirmLoading={isLoading}
+        onCancel={() => {
+          setSelectedCategory("");
+        }}
+      ></Modal>
       <Layout>
+        {contextHolder}
         <PageHeader>Tag management</PageHeader>
         {isOpenCreateTagModal && (
           <CreateTagModal
@@ -104,7 +147,7 @@ const CategoryManagement = () => {
         </Row>
         <Table
           columns={columns({
-            handleSelectDeleteUser,
+            handleSelectDeleteTag,
           })}
           dataSource={data}
           rowKey={(record) => record.id_tag}

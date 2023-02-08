@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-import { Col, Layout, notification, Row, Pagination } from "antd";
+import { Col, Layout, notification, Row, Pagination, Modal } from "antd";
 import PageHeader from "components/PageHeader";
 import CardPost from "components/CardPost";
 import { UserInfo } from "./UserManagement";
 import { DEL_FLAG, ORDER_BY, POST_STATUS } from "enums/index";
 import { useEffect } from "react";
-import { getPosts, changePostStatus } from "services/post";
+import { getPosts, changePostStatus, deletePost } from "services/post";
 export interface Post {
   id_post: number;
   userinfo: UserInfo;
@@ -34,6 +34,9 @@ const PostManagement = () => {
   const [data, setData] = useState<Post[]>([]);
   const [orderBy, setOrderBy] = useState<ORDER_BY | string>("");
   const [api, contextHolder] = notification.useNotification();
+  const [curPage, setCurPage] = useState(0);
+  const [selectedDeletePost, setSelectedDeletePost] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGetPost = async (offset: number) => {
     const payload = {
@@ -47,8 +50,8 @@ const PostManagement = () => {
   };
 
   useEffect(() => {
-    handleGetPost(0);
-  }, []);
+    handleGetPost(curPage * POST_PER_PAGES);
+  }, [curPage]);
 
   const handleChangePostStatus = async (
     id_post: string,
@@ -73,47 +76,83 @@ const PostManagement = () => {
     }
   };
 
+  const handleDeletePost = async () => {
+    if (selectedDeletePost) {
+      setIsLoading(true);
+      const [rs, err] = await deletePost({
+        id_post: selectedDeletePost,
+      });
+      if (err) {
+        api.error({
+          message: "Delete failed",
+        });
+      } else {
+        api.success({
+          message: "Delete succeed",
+        });
+        setSelectedDeletePost("");
+        handleGetPost((metadata.page - 1) * POST_PER_PAGES);
+      }
+      setIsLoading(false);
+    }
+  };
+  const handleSelectDeletePost = async (id_post: string) => {
+    setSelectedDeletePost(id_post);
+  };
+
   return (
-    <Layout>
-      {contextHolder}
-      <PageHeader>Post management</PageHeader>
-      <Row gutter={[16, 16]}>
-        {data.map((post) => (
-          <Col span={6}>
-            <CardPost
-              id_post={post.id_post.toString()}
-              thumbnail={post.thumbnail || "./nftDefault.png"}
-              title={post.title}
-              userInfo={post.userinfo}
-              key={post.id_post}
-              status={post.status}
-              create_at={post.create_at}
-              handleChangePostStatus={handleChangePostStatus}
-              view={post.view}
-              like={post.reactions.likes}
-            />
-          </Col>
-        ))}
-      </Row>
-      <Row
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "16px",
+    <>
+      <Modal
+        title="Are you sure ?"
+        open={!!selectedDeletePost}
+        onOk={handleDeletePost}
+        confirmLoading={isLoading}
+        onCancel={() => {
+          setSelectedDeletePost("");
         }}
-      >
-        {metadata && (
-          <Pagination
-            defaultCurrent={metadata.page}
-            total={metadata.total}
-            pageSize={POST_PER_PAGES}
-            onChange={(page, pageSize) => {
-              handleGetPost((page - 1) * POST_PER_PAGES);
-            }}
-          />
-        )}
-      </Row>
-    </Layout>
+      ></Modal>
+      <Layout>
+        {contextHolder}
+        <PageHeader>Post management</PageHeader>
+        <Row gutter={[16, 16]}>
+          {data.map((post) => (
+            <Col span={6} key={post.id_post}>
+              <CardPost
+                id_post={post.id_post.toString()}
+                thumbnail={post.thumbnail || "./nftDefault.png"}
+                title={post.title}
+                userInfo={post.userinfo}
+                status={post.status}
+                create_at={post.create_at}
+                handleChangePostStatus={handleChangePostStatus}
+                view={post.view}
+                like={post.reactions.likes}
+                handleDelete={handleSelectDeletePost}
+              />
+            </Col>
+          ))}
+        </Row>
+        <Row
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "16px",
+          }}
+        >
+          {metadata && (
+            <Pagination
+              defaultCurrent={metadata.page}
+              total={metadata.total}
+              pageSize={POST_PER_PAGES}
+              onChange={(page, pageSize) => {
+                setCurPage(page - 1);
+                // handleGetPost((page - 1) * POST_PER_PAGES);
+              }}
+            />
+          )}
+        </Row>
+      </Layout>
+    </>
   );
 };
 export default PostManagement;

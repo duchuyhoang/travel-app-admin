@@ -29,3 +29,12 @@ export const changePostStatus = async (payload: {
     return [null, e];
   }
 };
+
+export const deletePost = async ({ id_post }: { id_post: string }) => {
+  try {
+    const response = await axios.delete(`/post/${id_post}`);
+    return [response.data, null];
+  } catch (e) {
+    return [null, e];
+  }
+};
