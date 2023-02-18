@@ -38,3 +38,23 @@ export const deletePost = async ({ id_post }: { id_post: string }) => {
     return [null, e];
   }
 };
+
+export const statiscalPost = async ({
+  startDate,
+  endDate,
+}: {
+  startDate: Date;
+  endDate: Date;
+}) => {
+  try {
+    const response = await axios.get(`/admin/postByTime`, {
+      params: {
+        start: parseInt((new Date(startDate).getTime() / 1000).toString()),
+        end: parseInt((new Date(endDate).getTime() / 1000).toString()),
+      },
+    });
+    return [response.data, null];
+  } catch (e) {
+    return [null, e];
+  }
+};
